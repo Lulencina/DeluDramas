@@ -1,24 +1,345 @@
-<div style="padding: 20px; font-family: Arial, sans-serif;">
-  <h1>Mi Catálogo Asiático ⛩️</h1>
+<main class="app-shell">
+  <div class="glow glow-left"></div>
+  <div class="glow glow-right"></div>
 
-  <div style="margin-bottom: 30px;">
-    <input 
-      type="text" 
-      placeholder="Busca tu serie o actriz favorita (ej: LingLing)..." 
-      (input)="buscar($event)"
-      style="padding: 10px; width: 100%; max-width: 400px; border-radius: 5px; border: 1px solid #ddd;"
-    >
-  </div>
+  <header class="hero">
+    <p class="kicker">DeluDramas</p>
+    <h1>{{ title }}</h1>
+    <p class="subtitle">
+      Tu espacio para registrar K-pop, K-dramas y dramas asiaticos: lo que amaste, lo que no,
+      lo que estas viendo y todo lo que aun quieres descubrir.
+    </p>
+  </header>
 
-  <div style="display: flex; flex-wrap: wrap; gap: 20px;">
-    <div *ngFor="let s of series" style="border: 1px solid #eee; border-radius: 10px; padding: 10px; width: 200px; box-shadow: 2px 2px 10px rgba(0,0,0,0.1);">
-      <img [src]="'https://image.tmdb.org/t/p/w200' + s.poster_path" 
-           alt="{{ s.name || s.title }}" 
-           style="width: 100%; border-radius: 5px;">
-      <h3 style="font-size: 1rem; margin: 10px 0;">{{ s.name || s.title }}</h3>
-      <span style="background: #f0f0f0; padding: 2px 5px; font-size: 0.8rem; border-radius: 3px;">
-        {{ s.media_type === 'tv' ? 'Serie' : 'Película' }}
-      </span>
+  <section class="panel auth" *ngIf="!isLoggedIn">
+    <div class="mode-switch">
+      <button [class.active]="authMode === 'login'" (click)="setAuthMode('login')">Iniciar sesion</button>
+      <button [class.active]="authMode === 'register'" (click)="setAuthMode('register')">Registrarse</button>
     </div>
-  </div>
-</div>
+
+    <div class="form-grid">
+      <label *ngIf="authMode === 'register'">
+        Nombre de usuario
+        <input type="text" [(ngModel)]="authForm.username" placeholder="Ej: KDramaLover" />
+      </label>
+
+      <label>
+        Correo
+        <input type="email" [(ngModel)]="authForm.email" placeholder="tu@correo.com" />
+      </label>
+
+      <label>
+        Contrasena
+        <input type="password" [(ngModel)]="authForm.password" placeholder="********" />
+      </label>
+    </div>
+
+    <button class="cta" (click)="submitAuth()">
+      {{ authMode === 'register' ? 'Crear cuenta' : 'Entrar' }}
+    </button>
+
+    <p class="alert" *ngIf="authError">{{ authError }}</p>
+  </section>
+
+  <section class="workspace" *ngIf="isLoggedIn">
+    <div class="topbar panel">
+      <p>Bienvenida/o, <strong>{{ currentUser }}</strong></p>
+      <div class="topbar-right">
+        <span class="saving" *ngIf="isSaving">Guardando...</span>
+        <button class="ghost" (click)="logout()">Cerrar sesion</button>
+      </div>
+    </div>
+
+    <p class="alert" *ngIf="saveError">{{ saveError }}</p>
+
+    <nav class="panel nav-tabs">
+      <button [class.active]="activeSection === 'kdramas'" (click)="selectSection('kdramas')">Kdramas</button>
+      <button [class.active]="activeSection === 'artists'" (click)="selectSection('artists')">Artistas K-pop</button>
+      <button [class.active]="activeSection === 'asian'" (click)="selectSection('asian')">Dramas y artistas asiaticos</button>
+    </nav>
+
+    <section class="section-grid" *ngIf="activeSection === 'kdramas'">
+      <article class="panel list-panel">
+        <h2>Kdramas vistos y me gustaron</h2>
+        <div class="inline-form">
+          <input [(ngModel)]="kdramaForm.watchedLiked" placeholder="Agregar titulo" />
+          <button (click)="addKdrama('watchedLiked')">Agregar</button>
+        </div>
+        <ul>
+          <li *ngFor="let item of kdramas.watchedLiked; let i = index">
+            <span>{{ item }}</span>
+            <div class="item-actions">
+              <button class="small" (click)="editKdrama('watchedLiked', i)">Editar</button>
+              <button class="small ghost" (click)="removeKdrama('watchedLiked', i)">Eliminar</button>
+            </div>
+          </li>
+        </ul>
+      </article>
+
+      <article class="panel list-panel">
+        <h2>Kdramas vistos y no me gustaron</h2>
+        <div class="inline-form">
+          <input [(ngModel)]="kdramaForm.watchedDisliked" placeholder="Agregar titulo" />
+          <button (click)="addKdrama('watchedDisliked')">Agregar</button>
+        </div>
+        <ul>
+          <li *ngFor="let item of kdramas.watchedDisliked; let i = index">
+            <span>{{ item }}</span>
+            <div class="item-actions">
+              <button class="small" (click)="editKdrama('watchedDisliked', i)">Editar</button>
+              <button class="small ghost" (click)="removeKdrama('watchedDisliked', i)">Eliminar</button>
+            </div>
+          </li>
+        </ul>
+      </article>
+
+      <article class="panel list-panel">
+        <h2>Kdramas que estoy viendo</h2>
+        <div class="inline-form">
+          <input [(ngModel)]="kdramaForm.watching" placeholder="Agregar titulo" />
+          <button (click)="addKdrama('watching')">Agregar</button>
+        </div>
+        <ul>
+          <li *ngFor="let item of kdramas.watching; let i = index">
+            <span>{{ item }}</span>
+            <div class="item-actions">
+              <button class="small" (click)="editKdrama('watching', i)">Editar</button>
+              <button class="small ghost" (click)="removeKdrama('watching', i)">Eliminar</button>
+            </div>
+          </li>
+        </ul>
+      </article>
+
+      <article class="panel list-panel">
+        <h2>Kdramas que me gustaria ver</h2>
+        <div class="inline-form">
+          <input [(ngModel)]="kdramaForm.wishlist" placeholder="Agregar titulo" />
+          <button (click)="addKdrama('wishlist')">Agregar</button>
+        </div>
+        <ul>
+          <li *ngFor="let item of kdramas.wishlist; let i = index">
+            <span>{{ item }}</span>
+            <div class="item-actions">
+              <button class="small" (click)="editKdrama('wishlist', i)">Editar</button>
+              <button class="small ghost" (click)="removeKdrama('wishlist', i)">Eliminar</button>
+            </div>
+          </li>
+        </ul>
+      </article>
+
+      <article class="panel list-panel">
+        <h2>Kdramas no terminados</h2>
+        <div class="inline-form">
+          <input [(ngModel)]="kdramaForm.unfinished" placeholder="Agregar titulo" />
+          <button (click)="addKdrama('unfinished')">Agregar</button>
+        </div>
+        <ul>
+          <li *ngFor="let item of kdramas.unfinished; let i = index">
+            <span>{{ item }}</span>
+            <div class="item-actions">
+              <button class="small" (click)="editKdrama('unfinished', i)">Editar</button>
+              <button class="small ghost" (click)="removeKdrama('unfinished', i)">Eliminar</button>
+            </div>
+          </li>
+        </ul>
+      </article>
+
+      <article class="panel opinion-panel">
+        <h2>Tu opinion sobre Kdramas</h2>
+        <textarea [(ngModel)]="kdramaForm.opinion" rows="4" placeholder="Comparte tu opinion"></textarea>
+        <button (click)="addKdramaOpinion()">Publicar opinion</button>
+        <ul>
+          <li *ngFor="let opinion of kdramas.opinions; let i = index">
+            <span>{{ opinion }}</span>
+            <div class="item-actions">
+              <button class="small" (click)="editKdramaOpinion(i)">Editar</button>
+              <button class="small ghost" (click)="removeKdramaOpinion(i)">Eliminar</button>
+            </div>
+          </li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="section-grid" *ngIf="activeSection === 'artists'">
+      <article class="panel">
+        <h2>Agregar artista o banda</h2>
+        <div class="form-grid">
+          <label>
+            Nombre
+            <input [(ngModel)]="artistForm.name" placeholder="Ej: BTS" />
+          </label>
+          <label>
+            Musica que me gusta
+            <input [(ngModel)]="artistForm.favoriteMusic" placeholder="Ej: Spring Day" />
+          </label>
+          <label>
+            Reseña
+            <textarea [(ngModel)]="artistForm.review" rows="3" placeholder="Escribe tu reseña"></textarea>
+          </label>
+          <label>
+            Foto URL
+            <input [(ngModel)]="artistForm.photoUrl" placeholder="https://..." />
+          </label>
+        </div>
+        <button (click)="addArtist()">Guardar artista</button>
+      </article>
+
+      <article class="panel cards-panel">
+        <h2>Artistas guardados</h2>
+        <div class="cards">
+          <div class="artist-card" *ngFor="let artist of artists; let i = index">
+            <img [src]="artist.photoUrl" [alt]="artist.name" />
+            <h3>{{ artist.name }}</h3>
+            <p><strong>Musica:</strong> {{ artist.favoriteMusic }}</p>
+            <p>{{ artist.review }}</p>
+            <div class="item-actions">
+              <button class="small" (click)="editArtist(i)">Editar</button>
+              <button class="small ghost" (click)="removeArtist(i)">Eliminar</button>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="section-grid" *ngIf="activeSection === 'asian'">
+      <article class="panel list-panel">
+        <h2>Dramas asiaticos vistos y me gustaron</h2>
+        <div class="inline-form">
+          <input [(ngModel)]="asianDramaForm.watchedLiked" placeholder="Agregar titulo" />
+          <button (click)="addAsianDrama('watchedLiked')">Agregar</button>
+        </div>
+        <ul>
+          <li *ngFor="let item of asian.dramas.watchedLiked; let i = index">
+            <span>{{ item }}</span>
+            <div class="item-actions">
+              <button class="small" (click)="editAsianDrama('watchedLiked', i)">Editar</button>
+              <button class="small ghost" (click)="removeAsianDrama('watchedLiked', i)">Eliminar</button>
+            </div>
+          </li>
+        </ul>
+      </article>
+
+      <article class="panel list-panel">
+        <h2>Dramas asiaticos vistos y no me gustaron</h2>
+        <div class="inline-form">
+          <input [(ngModel)]="asianDramaForm.watchedDisliked" placeholder="Agregar titulo" />
+          <button (click)="addAsianDrama('watchedDisliked')">Agregar</button>
+        </div>
+        <ul>
+          <li *ngFor="let item of asian.dramas.watchedDisliked; let i = index">
+            <span>{{ item }}</span>
+            <div class="item-actions">
+              <button class="small" (click)="editAsianDrama('watchedDisliked', i)">Editar</button>
+              <button class="small ghost" (click)="removeAsianDrama('watchedDisliked', i)">Eliminar</button>
+            </div>
+          </li>
+        </ul>
+      </article>
+
+      <article class="panel list-panel">
+        <h2>Dramas asiaticos que estoy viendo</h2>
+        <div class="inline-form">
+          <input [(ngModel)]="asianDramaForm.watching" placeholder="Agregar titulo" />
+          <button (click)="addAsianDrama('watching')">Agregar</button>
+        </div>
+        <ul>
+          <li *ngFor="let item of asian.dramas.watching; let i = index">
+            <span>{{ item }}</span>
+            <div class="item-actions">
+              <button class="small" (click)="editAsianDrama('watching', i)">Editar</button>
+              <button class="small ghost" (click)="removeAsianDrama('watching', i)">Eliminar</button>
+            </div>
+          </li>
+        </ul>
+      </article>
+
+      <article class="panel list-panel">
+        <h2>Dramas asiaticos que me gustaria ver</h2>
+        <div class="inline-form">
+          <input [(ngModel)]="asianDramaForm.wishlist" placeholder="Agregar titulo" />
+          <button (click)="addAsianDrama('wishlist')">Agregar</button>
+        </div>
+        <ul>
+          <li *ngFor="let item of asian.dramas.wishlist; let i = index">
+            <span>{{ item }}</span>
+            <div class="item-actions">
+              <button class="small" (click)="editAsianDrama('wishlist', i)">Editar</button>
+              <button class="small ghost" (click)="removeAsianDrama('wishlist', i)">Eliminar</button>
+            </div>
+          </li>
+        </ul>
+      </article>
+
+      <article class="panel list-panel">
+        <h2>Dramas asiaticos no terminados</h2>
+        <div class="inline-form">
+          <input [(ngModel)]="asianDramaForm.unfinished" placeholder="Agregar titulo" />
+          <button (click)="addAsianDrama('unfinished')">Agregar</button>
+        </div>
+        <ul>
+          <li *ngFor="let item of asian.dramas.unfinished; let i = index">
+            <span>{{ item }}</span>
+            <div class="item-actions">
+              <button class="small" (click)="editAsianDrama('unfinished', i)">Editar</button>
+              <button class="small ghost" (click)="removeAsianDrama('unfinished', i)">Eliminar</button>
+            </div>
+          </li>
+        </ul>
+      </article>
+
+      <article class="panel opinion-panel">
+        <h2>Tu opinion sobre dramas asiaticos</h2>
+        <textarea [(ngModel)]="asianDramaForm.opinion" rows="4" placeholder="Comparte tu opinion"></textarea>
+        <button (click)="addAsianDramaOpinion()">Publicar opinion</button>
+        <ul>
+          <li *ngFor="let opinion of asian.dramas.opinions; let i = index">
+            <span>{{ opinion }}</span>
+            <div class="item-actions">
+              <button class="small" (click)="editAsianDramaOpinion(i)">Editar</button>
+              <button class="small ghost" (click)="removeAsianDramaOpinion(i)">Eliminar</button>
+            </div>
+          </li>
+        </ul>
+      </article>
+
+      <article class="panel">
+        <h2>Agregar artista asiatico</h2>
+        <div class="form-grid">
+          <label>
+            Nombre
+            <input [(ngModel)]="asianArtistForm.name" placeholder="Ej: Jay Chou" />
+          </label>
+          <label>
+            Musica que me gusta
+            <input [(ngModel)]="asianArtistForm.favoriteMusic" placeholder="Ej: Qi Li Xiang" />
+          </label>
+          <label>
+            Reseña
+            <textarea [(ngModel)]="asianArtistForm.review" rows="3" placeholder="Escribe tu reseña"></textarea>
+          </label>
+          <label>
+            Foto URL
+            <input [(ngModel)]="asianArtistForm.photoUrl" placeholder="https://..." />
+          </label>
+        </div>
+        <button (click)="addAsianArtist()">Guardar artista asiatico</button>
+      </article>
+
+      <article class="panel cards-panel">
+        <h2>Artistas asiaticos guardados</h2>
+        <div class="cards">
+          <div class="artist-card" *ngFor="let artist of asian.artists; let i = index">
+            <img [src]="artist.photoUrl" [alt]="artist.name" />
+            <h3>{{ artist.name }}</h3>
+            <p><strong>Musica:</strong> {{ artist.favoriteMusic }}</p>
+            <p>{{ artist.review }}</p>
+            <div class="item-actions">
+              <button class="small" (click)="editAsianArtist(i)">Editar</button>
+              <button class="small ghost" (click)="removeAsianArtist(i)">Eliminar</button>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+  </section>
+</main>

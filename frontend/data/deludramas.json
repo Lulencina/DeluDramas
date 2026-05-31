@@ -1,0 +1,62 @@
+{
+  "users": [
+    {
+      "id": "77087a7e-e23b-451b-a272-8f1183e5ecb1",
+      "username": "tester1",
+      "email": "tester1@example.com",
+      "passwordHash": "$2b$10$uF3mzgfP4wIR3zmbwUDORu1Pg4CXhfsIsoifU7jo7STR8uPCkG7ay"
+    },
+    {
+      "id": "b2a11a58-44c9-444c-9f43-fe081d5f492e",
+      "username": "belu",
+      "email": "belu@gmail.com",
+      "passwordHash": "$2b$10$dsvu8lpfAyXTsMSAKYlUN.qOG.vMzG2riaUWg3YkQ6msgXnZD5WNO"
+    }
+  ],
+  "trackers": {
+    "77087a7e-e23b-451b-a272-8f1183e5ecb1": {
+      "kdramas": {
+        "watchedLiked": [],
+        "watchedDisliked": [],
+        "watching": [],
+        "wishlist": [],
+        "unfinished": [],
+        "opinions": []
+      },
+      "artists": [],
+      "asian": {
+        "dramas": {
+          "watchedLiked": [],
+          "watchedDisliked": [],
+          "watching": [],
+          "wishlist": [],
+          "unfinished": [],
+          "opinions": []
+        },
+        "artists": []
+      }
+    },
+    "b2a11a58-44c9-444c-9f43-fe081d5f492e": {
+      "kdramas": {
+        "watchedLiked": [],
+        "watchedDisliked": [],
+        "watching": [],
+        "wishlist": [],
+        "unfinished": [],
+        "opinions": []
+      },
+      "artists": [],
+      "asian": {
+        "dramas": {
+          "watchedLiked": [],
+          "watchedDisliked": [],
+          "watching": [],
+          "wishlist": [],
+          "unfinished": [],
+          "opinions": []
+        },
+        "artists": []
+      }
+    }
+  }
+}
